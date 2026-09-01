@@ -18,7 +18,22 @@ public static class Divisors {
     /// <returns>List of divisors</returns>
     private static List<int> FindDivisors(int number) {
         List<int> results = new();
-        // TODO problem 1
+
+        // Plan:
+        // 1. Start an empty dynamic array (List<int>) called results.
+        // 2. Try every candidate divisor from 1 up to (but NOT including) number.
+        //    - 1 is included because 1 divides every number.
+        // 3. A candidate i divides number when the remainder of number / i is zero,
+        //    which in C# is written number % i == 0.
+        // 4. When that is true, append i to results (append is O(1) amortized).
+        // 5. Return results. If number is prime the list will only contain 1.
+
+        for (int i = 1; i < number; i++) {
+            if (number % i == 0) {
+                results.Add(i);
+            }
+        }
+
         return results;
     }
 }
