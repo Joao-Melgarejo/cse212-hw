@@ -10,7 +10,9 @@
         queue.Enqueue(100);
         var value = queue.Dequeue();
         Console.WriteLine(value);
-        // Defect(s) Found:
+        // Defect(s) Found: Defect #1 - Dequeue read and removed index 1 instead of index 0.
+        // With a single item in the list, index 1 does not exist, so the program crashed with
+        // ArgumentOutOfRangeException instead of printing 100.
 
         Console.WriteLine("------------");
 
@@ -28,7 +30,9 @@
         Console.WriteLine(value);
         value = queue.Dequeue();
         Console.WriteLine(value);
-        // Defect(s) Found: 
+        // Defect(s) Found: Defect #2 - Enqueue inserted at index 0 (the front), so the list was
+        // reversed and the queue behaved like a stack (LIFO). Combined with defect #1 the output
+        // was 300, 200 and then a crash, instead of 200, 300, 400.
 
         Console.WriteLine("------------");
 
@@ -44,7 +48,8 @@
         catch (IndexOutOfRangeException) {
             Console.WriteLine("I got the exception as expected.");
         }
-        // Defect(s) Found: 
+        // Defect(s) Found: None. The empty check was already correct and it throws
+        // IndexOutOfRangeException as requirement #3 demands.
     }
 
     private readonly List<int> _queue = new();
@@ -54,7 +59,10 @@
     /// </summary>
     /// <param name="value">Integer value to add to the queue</param>
     private void Enqueue(int value) {
-        _queue.Insert(0, value);
+        // Plan: requirement #1 says a new item goes to the BACK of the queue.
+        // In a List the back is the end, so use Add (which appends) instead of
+        // Insert(0, ...) which put the item at the front.
+        _queue.Add(value); // Fix for defect #2
     }
 
     /// <summary>
@@ -66,8 +74,10 @@
         if (_queue.Count <= 0)
             throw new IndexOutOfRangeException();
 
-        var value = _queue[1];
-        _queue.RemoveAt(1);
+        // Plan: requirement #2 says we remove from the FRONT of the queue.
+        // In a List the front is index 0, not index 1.
+        var value = _queue[0]; // Fix for defect #1
+        _queue.RemoveAt(0);    // Fix for defect #1
         return value;
     }
 }
