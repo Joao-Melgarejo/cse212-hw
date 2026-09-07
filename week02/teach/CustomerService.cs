@@ -9,26 +9,84 @@ public class CustomerService {
         // Console.WriteLine(cs);
 
         // Test Cases
+        //
+        // Plan: one test per requirement, written from the requirements only
+        // (not from the code), so a wrong implementation cannot hide behind a
+        // test that was written to match it.
+        //   Req 1 -> Test 5 (invalid max size defaults to 10)
+        //   Req 2 -> Test 1 and Test 2 (AddNewCustomer enqueues)
+        //   Req 3 -> Test 4 (queue full -> error message)
+        //   Req 4 -> Test 1 and Test 2 (ServeCustomer dequeues and displays)
+        //   Req 5 -> Test 3 (queue empty -> error message)
 
         // Test 1
-        // Scenario: 
-        // Expected Result: 
+        // Scenario: Add one customer and then serve that customer.
+        // Expected Result: The details of the customer that was just added are displayed,
+        //                  and the queue ends up empty.
         Console.WriteLine("Test 1");
-
-        // Defect(s) Found: 
+        var cs = new CustomerService(4);
+        cs.AddNewCustomer();
+        Console.WriteLine($"Before serving: {cs}");
+        cs.ServeCustomer();
+        Console.WriteLine($"After serving: {cs}");
+        // Defect(s) Found: Defect #1 - ServeCustomer removed index 0 BEFORE reading it, so it
+        // displayed the wrong record; with only one customer in the queue it crashed with
+        // ArgumentOutOfRangeException.
 
         Console.WriteLine("=================");
 
         // Test 2
-        // Scenario: 
-        // Expected Result: 
+        // Scenario: Add two customers and serve them both.
+        // Expected Result: They are displayed in the same order they were added (FIFO).
         Console.WriteLine("Test 2");
-
-        // Defect(s) Found: 
+        cs = new CustomerService(4);
+        cs.AddNewCustomer();
+        cs.AddNewCustomer();
+        Console.WriteLine($"Before serving: {cs}");
+        cs.ServeCustomer();
+        cs.ServeCustomer();
+        Console.WriteLine($"After serving: {cs}");
+        // Defect(s) Found: None once defect #1 was fixed. AddNewCustomer already appended to the
+        // end of the list and ServeCustomer already took index 0, so the FIFO order was correct.
 
         Console.WriteLine("=================");
 
-        // Add more Test Cases As Needed Below
+        // Test 3
+        // Scenario: Serve a customer when the queue is empty.
+        // Expected Result: An error message is displayed and the program does not crash.
+        Console.WriteLine("Test 3");
+        cs = new CustomerService(4);
+        cs.ServeCustomer();
+        // Defect(s) Found: Defect #2 - ServeCustomer never checked whether the queue was empty,
+        // so it crashed with ArgumentOutOfRangeException instead of showing an error message.
+
+        Console.WriteLine("=================");
+
+        // Test 4
+        // Scenario: Create a queue with max size 4 and try to add 5 customers.
+        // Expected Result: The 5th one is rejected with an error message and the queue keeps size 4.
+        Console.WriteLine("Test 4");
+        cs = new CustomerService(4);
+        cs.AddNewCustomer();
+        cs.AddNewCustomer();
+        cs.AddNewCustomer();
+        cs.AddNewCustomer();
+        cs.AddNewCustomer();
+        Console.WriteLine($"Service Queue: {cs}");
+        // Defect(s) Found: Defect #3 - the room check used > instead of >=, so it let a 5th
+        // customer in and the queue grew to maxSize + 1.
+
+        Console.WriteLine("=================");
+
+        // Test 5
+        // Scenario: Create the queue with an invalid max size (0 and a negative number).
+        // Expected Result: The max size falls back to 10 in both cases.
+        Console.WriteLine("Test 5");
+        cs = new CustomerService(0);
+        Console.WriteLine($"max_size should be 10: {cs}");
+        cs = new CustomerService(-5);
+        Console.WriteLine($"max_size should be 10: {cs}");
+        // Defect(s) Found: None. The constructor already defaulted an invalid size to 10.
     }
 
     private readonly List<Customer> _queue = new();
@@ -67,7 +125,10 @@ public class CustomerService {
     /// </summary>
     private void AddNewCustomer() {
         // Verify there is room in the service queue
-        if (_queue.Count > _maxSize) {
+        // Plan: the queue is full when it ALREADY holds _maxSize customers, so the
+        // comparison has to be >=. With > the queue was allowed to reach _maxSize + 1.
+        // if (_queue.Count > _maxSize)  // Defect #3 - off-by-one
+        if (_queue.Count >= _maxSize) {
             Console.WriteLine("Maximum Number of Customers in Queue.");
             return;
         }
@@ -88,8 +149,18 @@ public class CustomerService {
     /// Dequeue the next customer and display the information.
     /// </summary>
     private void ServeCustomer() {
+        // Plan:
+        //  1) Requirement #5: if the queue is empty we must show an error message,
+        //     not touch the list (defect #2 - the check did not exist).
+        //  2) Requirement #4: read the customer at the front FIRST, then remove it,
+        //     then display it (defect #1 - the original removed before reading).
+        if (_queue.Count <= 0) {
+            Console.WriteLine("No Customers in the queue."); // Fix for defect #2
+            return;
+        }
+
+        var customer = _queue[0]; // Fix for defect #1 - read before removing
         _queue.RemoveAt(0);
-        var customer = _queue[0];
         Console.WriteLine(customer);
     }
 
