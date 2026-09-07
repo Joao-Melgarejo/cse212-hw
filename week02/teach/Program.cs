@@ -1,3 +1,5 @@
 ﻿Console.WriteLine("\n======================\nCustomer Service\n======================");
 CustomerService.Run();
-// CustomerServiceSolution.Run();
+
+Console.WriteLine("\n======================\nCustomer Service (Solution)\n======================");
+CustomerServiceSolution.Run();
