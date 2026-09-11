@@ -40,7 +40,20 @@ public class TakingTurnsQueue
         else
         {
             Person person = _people.Dequeue();
-            if (person.Turns > 1)
+
+            // Plan: after dequeuing there are exactly three cases.
+            //  a) Turns <= 0  -> infinite turns (requirement #4). Put the person back
+            //     WITHOUT touching Turns, so the value stays 0 or negative. The tests
+            //     assert this explicitly: 'a very big number is not infinite'.
+            //  b) Turns > 1   -> finite turns left. Spend one turn and put them back.
+            //  c) Turns == 1  -> this was their last turn, so they are not re-added.
+            // Defect #2 fix: the original only had case (b), so anyone with 0 or fewer
+            // turns fell through and was silently dropped from the queue forever.
+            if (person.Turns <= 0)
+            {
+                _people.Enqueue(person);
+            }
+            else if (person.Turns > 1)
             {
                 person.Turns -= 1;
                 _people.Enqueue(person);
