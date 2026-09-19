@@ -22,9 +22,30 @@
         Console.WriteLine($"Number of duplicates : {CountDuplicates(data)}");
     }
 
+    // PLAN (written before implementing):
+    // Goal: count how many values in the array are repeats of a value already seen.
+    // 1. Create an empty HashSet<int> called "unique". A set cannot hold duplicates and
+    //    its Contains/Add operations are O(1) because they are based on hashing.
+    // 2. Create a counter "duplicates" starting at 0.
+    // 3. Walk the array one value at a time (that walk is O(n)):
+    //    a. If the set already contains the value, this occurrence is a duplicate,
+    //       so increase the counter by 1.
+    //    b. If it does not, this is the first time we see it, so add it to the set.
+    // 4. Return the counter.
+    // Performance: n values x O(1) per value = O(n) time, O(n) extra memory for the set.
     private static int CountDuplicates(int[] data)
     {
-        // Add code here.
-        return 0;
+        var unique = new HashSet<int>();
+        var duplicates = 0;
+
+        foreach (var value in data)
+        {
+            if (unique.Contains(value))
+                duplicates++;
+            else
+                unique.Add(value);
+        }
+
+        return duplicates;
     }
 }

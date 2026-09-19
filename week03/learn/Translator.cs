@@ -22,9 +22,16 @@ public class Translator
     /// <param name="fromWord">The word to translate from</param>
     /// <param name="toWord">The word to translate to</param>
     /// <returns>fixed array of divisors</returns>
+    // PLAN (written before implementing):
+    // A map stores key -> value pairs. Here the key is the word in the original
+    // language and the value is its translation.
+    // Using the indexer (_words[key] = value) instead of Add(key, value) means that
+    // adding the same word twice overwrites the old translation instead of throwing
+    // an ArgumentException. That matches the assumption "one translation per word".
+    // Performance: O(1), the cost of hashing the key.
     public void AddWord(string fromWord, string toWord)
     {
-        // ADD YOUR CODE HERE
+        _words[fromWord] = toWord;
     }
 
     /// <summary>
@@ -32,9 +39,18 @@ public class Translator
     /// </summary>
     /// <param name="fromWord">The word to translate</param>
     /// <returns>The translated word or "???" if no translation is available</returns>
+    // PLAN (written before implementing):
+    // 1. Ask the map whether it holds that key (TryGetValue does the lookup and gives
+    //    back the value in a single hashing operation).
+    // 2. If it does, return the stored translation.
+    // 3. If it does not, return "???" instead of letting the lookup throw a
+    //    KeyNotFoundException. Never read a key with _words[key] without checking first.
+    // Performance: O(1), the cost of hashing the key.
     public string Translate(string fromWord)
     {
-        // ADD YOUR CODE HERE
-        return "";
+        if (_words.TryGetValue(fromWord, out var translation))
+            return translation;
+
+        return "???";
     }
 }
