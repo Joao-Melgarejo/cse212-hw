@@ -49,5 +49,42 @@ public static class Trees
     private static void InsertMiddle(int[] sortedNumbers, int first, int last, BinarySearchTree bst)
     {
         // TODO Start Problem 5
+
+        // PLAN (Problem 5 - Build a balanced BST from a sorted list)
+        // 1. Understand: inserting a sorted list from left to right degenerates the BST
+        //    into a linked list (height n, search O(n)). We want the tree balanced.
+        // 2. Key idea: whichever value is inserted FIRST becomes the root of that
+        //    range. If we always insert the MIDDLE of the range first, the values that
+        //    are left over split into two halves of (almost) the same size, and the
+        //    same reasoning applies recursively to each half.
+        // 3. Design (recursive):
+        //      - base case: first > last  -> the range is empty, insert nothing
+        //      - middle = first + (last - first) / 2
+        //        (same value as (first + last) / 2 but it cannot overflow int)
+        //      - insert sortedNumbers[middle] into the bst
+        //      - recurse on the left half  (first,      middle - 1)
+        //      - recurse on the right half (middle + 1, last)
+        //    Only indices are passed around: no slicing, no sub-arrays, no copies.
+        // 4. Trace for {10, 20, 30, 40, 50, 60} with first=0, last=5:
+        //      (0,5) mid=2 -> insert 30
+        //        (0,1) mid=0 -> insert 10
+        //          (0,-1) empty        (1,1) mid=1 -> insert 20
+        //        (3,5) mid=4 -> insert 50
+        //          (3,3) mid=3 -> insert 40        (5,5) mid=5 -> insert 60
+        //    Insertion order 30, 10, 20, 50, 40, 60 -> height 3 (balanced)
+        // 5. Performance: O(n log n) - n insertions, each one O(log n) because the tree
+        //    stays balanced. Extra memory O(log n) for the recursion stack.
+
+        // Base case: an empty range (this also covers an empty input array, where the
+        // first call arrives as first = 0 and last = -1).
+        if (first > last)
+            return;
+
+        var middle = first + (last - first) / 2;
+        bst.Insert(sortedNumbers[middle]);
+
+        // Smaller problems: the values before the middle and the values after it.
+        InsertMiddle(sortedNumbers, first, middle - 1, bst);
+        InsertMiddle(sortedNumbers, middle + 1, last, bst);
     }
 }

@@ -81,6 +81,24 @@ public class BinarySearchTree : IEnumerable<int>
     private void TraverseBackward(Node? node, List<int> values)
     {
         // TODO Problem 3
+
+        // PLAN (Problem 3 - Traverse backward)
+        // 1. Understand: fill the 'values' list from the LARGEST value down to the
+        //    smallest, so that Reverse() can yield them in descending order.
+        // 2. Study TraverseForward: it does left -> current -> right (in-order), which
+        //    produces ascending order because everything on the left is smaller.
+        // 3. Design: mirror it. Visiting right -> current -> left (reverse in-order)
+        //    produces descending order for exactly the same reason.
+        // 4. Base case: a null node adds nothing and stops the recursion.
+        // 5. Performance: O(n) time (each node visited once) and O(n) extra memory for
+        //    the list, plus O(h) for the recursion stack.
+
+        if (node is not null)
+        {
+            TraverseBackward(node.Right, values);
+            values.Add(node.Data);
+            TraverseBackward(node.Left, values);
+        }
     }
 
     /// <summary>
